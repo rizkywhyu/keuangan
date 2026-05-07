@@ -51,6 +51,25 @@ class AuthController extends Controller
         return redirect()->route('dashboard');
     }
 
+    public function showResetPassword()
+    {
+        return view('auth.reset-password');
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        User::where('email', $request->email)->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->route('login')->with('success', 'Password berhasil diubah. Silakan login.');
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();

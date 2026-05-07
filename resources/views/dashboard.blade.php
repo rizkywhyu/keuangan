@@ -75,6 +75,38 @@
     {{-- Recent Transactions --}}
     <div class="bg-white rounded-xl shadow p-6">
         <h3 class="text-lg font-semibold mb-4">Transaksi Terakhir</h3>
+        <form method="GET" action="{{ route('dashboard') }}" class="flex flex-wrap items-end gap-3 mb-4">
+            <input type="hidden" name="year" value="{{ $year }}">
+            @if($startDate) <input type="hidden" name="start_date" value="{{ $startDate }}"> @endif
+            @if($endDate) <input type="hidden" name="end_date" value="{{ $endDate }}"> @endif
+            <div>
+                <label class="block text-xs text-gray-500">Pocket</label>
+                <select name="filter_pocket" class="rounded-lg border-gray-300 shadow-sm px-3 py-1.5 border text-sm">
+                    <option value="">Semua</option>
+                    @foreach($pockets as $pocket)
+                        <option value="{{ $pocket->id }}" {{ request('filter_pocket') == $pocket->id ? 'selected' : '' }}>{{ $pocket->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500">Tipe</label>
+                <select name="filter_type" class="rounded-lg border-gray-300 shadow-sm px-3 py-1.5 border text-sm">
+                    <option value="">Semua</option>
+                    <option value="income" {{ request('filter_type') == 'income' ? 'selected' : '' }}>Masuk</option>
+                    <option value="expense" {{ request('filter_type') == 'expense' ? 'selected' : '' }}>Keluar</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500">Dari</label>
+                <input type="date" name="filter_start" value="{{ request('filter_start') }}" class="rounded-lg border-gray-300 shadow-sm px-3 py-1.5 border text-sm">
+            </div>
+            <div>
+                <label class="block text-xs text-gray-500">Sampai</label>
+                <input type="date" name="filter_end" value="{{ request('filter_end') }}" class="rounded-lg border-gray-300 shadow-sm px-3 py-1.5 border text-sm">
+            </div>
+            <button type="submit" class="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-indigo-700">Filter</button>
+            <a href="{{ route('dashboard', ['year' => $year, 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="text-gray-500 hover:text-gray-700 text-sm">Reset</a>
+        </form>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -106,6 +138,9 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+        <div class="mt-4">
+            {{ $recentTransactions->links() }}
         </div>
     </div>
 </div>

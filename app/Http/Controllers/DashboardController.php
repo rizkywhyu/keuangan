@@ -51,8 +51,19 @@ class DashboardController extends Controller
         }
 
         // Recent transactions
-        $recentTransactions = Transaction::whereIn('pocket_id', $pockets->pluck('id'))
-            ->with('pocket')->latest('date')->limit(10)->get();
+        $recentQuery = Transaction::whereIn('pocket_id', $pockets->pluck('id'))->with('pocket');
+
+        if ($request->filled('filter_pocket')) {
+            $recentQuery->where('pocket_id', $request->filter_pocket);
+        }
+        if ($request->filled('filter_type')) {
+            $recentQuery->where('type', $request->filter_type);
+        }
+        if ($request->filled('filter_start') && $request->filled('filter_end')) {
+            $recentQuery->whereBetween('date', [$request->filter_start, $request->filter_end]);
+        }
+
+        $recentTransactions = $recentQuery->latest('date')->paginate(10)->withQueryString();
 
         $totalExpense = $query->where('type', 'expense')->sum('amount');
 
