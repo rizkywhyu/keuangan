@@ -15,11 +15,26 @@ if (!file_exists(__DIR__ . '/../.env') && file_exists($vercelEnv)) {
     $dotenv->load();
 }
 
+// Ensure services.php exists (Vercel Git deploy may not generate it)
+$servicesCache = __DIR__ . '/../bootstrap/cache/services.php';
+if (!file_exists($servicesCache)) {
+    // Write to /tmp since filesystem is read-only
+    putenv('APP_SERVICES_CACHE=/tmp/services.php');
+    $_ENV['APP_SERVICES_CACHE'] = '/tmp/services.php';
+    $_SERVER['APP_SERVICES_CACHE'] = '/tmp/services.php';
+}
+
+$packagesCache = __DIR__ . '/../bootstrap/cache/packages.php';
+if (!file_exists($packagesCache)) {
+    putenv('APP_PACKAGES_CACHE=/tmp/packages.php');
+    $_ENV['APP_PACKAGES_CACHE'] = '/tmp/packages.php';
+    $_SERVER['APP_PACKAGES_CACHE'] = '/tmp/packages.php';
+}
+
 try {
     $app = require_once __DIR__ . '/../bootstrap/app.php';
     $app->useStoragePath('/tmp/storage');
 
-    // Manually bootstrap to catch the real error
     $kernel = $app->make(Illuminate\Contracts\Http\Kernel::class);
     $response = $kernel->handle($request = Illuminate\Http\Request::capture());
     $response->send();
