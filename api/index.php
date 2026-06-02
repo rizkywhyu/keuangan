@@ -6,13 +6,14 @@ foreach (['/tmp/storage/framework/views', '/tmp/storage/framework/cache', '/tmp/
     }
 }
 
-$envFile = __DIR__ . '/../.env';
-$vercelEnv = __DIR__ . '/../.env.vercel';
-if (!file_exists($envFile) && file_exists($vercelEnv)) {
-    copy($vercelEnv, $envFile);
-}
-
 require __DIR__ . '/../vendor/autoload.php';
+
+// Load .env.vercel directly (filesystem is read-only on Vercel)
+$vercelEnv = __DIR__ . '/../.env.vercel';
+if (!file_exists(__DIR__ . '/../.env') && file_exists($vercelEnv)) {
+    $dotenv = Dotenv\Dotenv::createImmutable(dirname($vercelEnv), '.env.vercel');
+    $dotenv->load();
+}
 
 try {
     $app = require_once __DIR__ . '/../bootstrap/app.php';
